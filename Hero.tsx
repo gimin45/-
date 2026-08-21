@@ -109,6 +109,8 @@ export const Hero: React.FC = () => {
                   alt={heroVisuals.sub1.label}
                   className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
                   referrerPolicy="no-referrer"
+                  optimizeWidth={900}
+                  sizes="(min-width: 1024px) 34vw, 100vw"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
               </div>
@@ -151,6 +153,8 @@ export const Hero: React.FC = () => {
                   alt={heroVisuals.main.label}
                   className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
                   referrerPolicy="no-referrer"
+                  optimizeWidth={1100}
+                  sizes="(min-width: 1024px) 42vw, 100vw"
                 />
                 {/* Overlay badge */}
                 <div className="absolute top-4 right-4">
@@ -211,6 +215,8 @@ export const Hero: React.FC = () => {
                   alt={heroVisuals.sub2.label}
                   className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
                   referrerPolicy="no-referrer"
+                  optimizeWidth={800}
+                  sizes="(min-width: 1024px) 25vw, 100vw"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
               </div>

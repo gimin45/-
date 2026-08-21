@@ -50,6 +50,9 @@ export const ImageLightbox: React.FC = () => {
           className="max-h-[85vh] max-w-[95vw] object-contain rounded-lg shadow-2xl transition-transform duration-300 cursor-default"
           onClick={(e) => e.stopPropagation()}
           referrerPolicy="no-referrer"
+          optimizeWidth={2000}
+          optimizeQuality={86}
+          sizes="95vw"
           immediate
         />
       </div>

@@ -163,6 +163,8 @@ export const AboutSection: React.FC = () => {
                   onError={() => setImgError(true)}
                   className="w-full h-full object-cover object-center"
                   referrerPolicy="no-referrer"
+                  optimizeWidth={700}
+                  sizes="(min-width: 1024px) 33vw, 100vw"
                 />
                 
                 {/* Status Overlay Pill */}

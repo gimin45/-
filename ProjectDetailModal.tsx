@@ -146,6 +146,9 @@ export const ProjectDetailModal: React.FC = () => {
               alt={selectedProject.title}
               className="w-full max-h-[560px] object-cover object-top"
               referrerPolicy="no-referrer"
+              optimizeWidth={1600}
+              optimizeQuality={82}
+              sizes="(min-width: 1024px) 1100px, 95vw"
               immediate
             />
             <button
@@ -202,6 +205,8 @@ export const ProjectDetailModal: React.FC = () => {
                           alt={img.title}
                           className="w-full h-full object-cover object-center group-hover:scale-103 transition-transform duration-500"
                           referrerPolicy="no-referrer"
+                          optimizeWidth={1100}
+                          sizes="(min-width: 768px) 50vw, 100vw"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60 group-hover:opacity-30 transition-opacity"></div>
                         <div className="absolute top-3 left-3">

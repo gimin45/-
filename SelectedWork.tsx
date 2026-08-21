@@ -106,6 +106,8 @@ export const SelectedWork: React.FC = () => {
                       alt={project.title}
                       className="w-full h-full object-cover object-center group-hover:scale-103 transition-transform duration-700"
                       referrerPolicy="no-referrer"
+                      optimizeWidth={1200}
+                      sizes="(min-width: 1024px) 58vw, 100vw"
                     />
 
                     {/* Gradient Overlay */}
