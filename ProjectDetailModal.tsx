@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { DeferredImage } from './DeferredImage';
 import { usePortfolio } from '../context/PortfolioContext';
 import {
   X,
@@ -140,12 +141,12 @@ export const ProjectDetailModal: React.FC = () => {
 
           {/* Main Hero Visual in Case Study */}
           <div className="rounded-2xl overflow-hidden border border-[#E5E3DC] bg-[#111111] relative group">
-            <img
+            <DeferredImage
               src={selectedProject.coverImage}
               alt={selectedProject.title}
               className="w-full max-h-[560px] object-cover object-top"
               referrerPolicy="no-referrer"
-              decoding="async"
+              immediate
             />
             <button
               onClick={() => openLightbox(selectedProject.coverImage, selectedProject.title, selectedProject.summary)}
@@ -196,14 +197,11 @@ export const ProjectDetailModal: React.FC = () => {
                           isFullSpan ? 'aspect-16/9 sm:max-h-[440px]' : 'aspect-4/3'
                         }`}
                       >
-                        <img
+                        <DeferredImage
                           src={img.url}
                           alt={img.title}
                           className="w-full h-full object-cover object-center group-hover:scale-103 transition-transform duration-500"
                           referrerPolicy="no-referrer"
-                          loading="lazy"
-                          decoding="async"
-                          fetchPriority="low"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60 group-hover:opacity-30 transition-opacity"></div>
                         <div className="absolute top-3 left-3">

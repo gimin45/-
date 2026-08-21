@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { DeferredImage } from './DeferredImage';
 import { usePortfolio } from '../context/PortfolioContext';
 import {
   GraduationCap,
@@ -156,15 +157,12 @@ export const AboutSection: React.FC = () => {
             {/* Photo Card */}
             <div className="bg-[#FFFFFF] rounded-2xl border border-[#E5E3DC] p-5 shadow-xs overflow-hidden">
               <div className="relative aspect-4/5 w-full rounded-xl overflow-hidden bg-[#111111] border border-[#E5E3DC]">
-                <img
+                <DeferredImage
                   src={photoSrc}
                   alt={`${siteConfig.name} 프로필 사진`}
                   onError={() => setImgError(true)}
                   className="w-full h-full object-cover object-center"
                   referrerPolicy="no-referrer"
-                  loading="lazy"
-                  decoding="async"
-                  fetchPriority="low"
                 />
                 
                 {/* Status Overlay Pill */}

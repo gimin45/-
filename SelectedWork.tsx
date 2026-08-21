@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { DeferredImage } from './DeferredImage';
 import { usePortfolio } from '../context/PortfolioContext';
 import { Project } from '../types';
 import { ArrowUpRight, BarChart3, Sparkles } from 'lucide-react';
@@ -100,14 +101,11 @@ export const SelectedWork: React.FC = () => {
                       isReversed ? 'lg:order-2' : 'lg:order-1'
                     }`}
                   >
-                    <img
+                    <DeferredImage
                       src={project.coverImage}
                       alt={project.title}
                       className="w-full h-full object-cover object-center group-hover:scale-103 transition-transform duration-700"
                       referrerPolicy="no-referrer"
-                      loading="lazy"
-                      decoding="async"
-                      fetchPriority="low"
                     />
 
                     {/* Gradient Overlay */}

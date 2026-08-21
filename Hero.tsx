@@ -1,4 +1,5 @@
 import React from 'react';
+import { DeferredImage } from './DeferredImage';
 import { usePortfolio } from '../context/PortfolioContext';
 import { DEFAULT_SITE_CONFIG } from '../data/defaultData';
 import { ArrowDownRight, Eye, Share2, Heart, Sparkles, ExternalLink } from 'lucide-react';
@@ -103,14 +104,11 @@ export const Hero: React.FC = () => {
               className="lg:col-span-4 group relative cursor-pointer overflow-hidden rounded-xl border border-[#E5E3DC] bg-[#111111] transition-all duration-300 hover:border-[#07732C] hover:shadow-lg flex flex-col"
             >
               <div className="relative aspect-4/3 sm:aspect-1/1 lg:aspect-auto lg:h-[300px] w-full overflow-hidden bg-[#161b22]">
-                <img
+                <DeferredImage
                   src={heroVisuals.sub1.url}
                   alt={heroVisuals.sub1.label}
                   className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
                   referrerPolicy="no-referrer"
-                  loading="lazy"
-                  decoding="async"
-                  fetchPriority="low"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
               </div>
@@ -148,14 +146,11 @@ export const Hero: React.FC = () => {
               className="lg:col-span-5 group relative cursor-pointer overflow-hidden rounded-xl border-2 border-[#07732C] bg-[#090d16] transition-all duration-300 hover:shadow-2xl flex flex-col"
             >
               <div className="relative aspect-4/3 sm:aspect-1/1 lg:aspect-auto lg:h-[300px] w-full overflow-hidden bg-[#0f172a]">
-                <img
+                <DeferredImage
                   src={heroVisuals.main.url}
                   alt={heroVisuals.main.label}
                   className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
                   referrerPolicy="no-referrer"
-                  loading="lazy"
-                  decoding="async"
-                  fetchPriority="low"
                 />
                 {/* Overlay badge */}
                 <div className="absolute top-4 right-4">
@@ -211,14 +206,11 @@ export const Hero: React.FC = () => {
               className="lg:col-span-3 group relative cursor-pointer overflow-hidden rounded-xl border border-[#E5E3DC] bg-[#0b1b3d] transition-all duration-300 hover:border-[#07732C] hover:shadow-lg flex flex-col"
             >
               <div className="relative aspect-4/3 sm:aspect-1/1 lg:aspect-auto lg:h-[300px] w-full overflow-hidden bg-[#0b1b3d]">
-                <img
+                <DeferredImage
                   src={heroVisuals.sub2.url}
                   alt={heroVisuals.sub2.label}
                   className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
                   referrerPolicy="no-referrer"
-                  loading="lazy"
-                  decoding="async"
-                  fetchPriority="low"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
               </div>

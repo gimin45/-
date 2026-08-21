@@ -1,4 +1,5 @@
 import React from 'react';
+import { DeferredImage } from './DeferredImage';
 import { usePortfolio } from '../context/PortfolioContext';
 import { X } from 'lucide-react';
 
@@ -43,13 +44,13 @@ export const ImageLightbox: React.FC = () => {
         className="flex-1 flex items-center justify-center p-2 sm:p-6 overflow-hidden cursor-zoom-out"
         onClick={closeLightbox}
       >
-        <img
+        <DeferredImage
           src={lightboxImage.url}
           alt={lightboxImage.title}
           className="max-h-[85vh] max-w-[95vw] object-contain rounded-lg shadow-2xl transition-transform duration-300 cursor-default"
           onClick={(e) => e.stopPropagation()}
           referrerPolicy="no-referrer"
-          decoding="async"
+          immediate
         />
       </div>
 
