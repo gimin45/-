@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { Project, ExperienceItem, HowIWorkStep, SiteConfig, WorkshopGraphic, ResumeData, ProjectImage } from '../types';
+import deployedBackupUrl from '../../portfolio_backup.json?url';
 import {
   DEFAULT_PROJECTS,
   DEFAULT_EXPERIENCE,
@@ -65,7 +66,45 @@ const STORAGE_KEYS = {
   ADMIN_AUTH: 'hong_gimin_admin_auth_v2',
 };
 
+/**
+ * Deployed default data
+ * ---------------------
+ * The repository-root portfolio_backup.json file is bundled as the site's shared baseline.
+ * New visitors (who do not have local CMS data yet) receive that backup automatically.
+ * Existing admin edits in localStorage still take priority on that browser.
+ */
+type PortfolioBackupBundle = {
+  siteConfig?: SiteConfig;
+  projects?: Project[];
+  experience?: ExperienceItem[];
+  howIWork?: HowIWorkStep[];
+  resumeData?: ResumeData;
+  exportedAt?: string;
+  version?: string;
+};
+
+const hasStoredValue = (key: string) => {
+  try {
+    return localStorage.getItem(key) !== null;
+  } catch {
+    return false;
+  }
+};
+
 export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // Snapshot whether this browser already had CMS data BEFORE this app starts writing to storage.
+  // This lets a shared deployed backup become the default only for fresh visitors.
+  const hadLocalDataAtStartup = useRef({
+    siteConfig: hasStoredValue(STORAGE_KEYS.SITE_CONFIG),
+    projects: hasStoredValue(STORAGE_KEYS.PROJECTS),
+    experience: hasStoredValue(STORAGE_KEYS.EXPERIENCE),
+    howIWork: hasStoredValue(STORAGE_KEYS.HOW_I_WORK),
+    resumeData: hasStoredValue(STORAGE_KEYS.RESUME_DATA),
+  }).current;
+
+  const [bootstrapDone, setBootstrapDone] = useState(false);
+  const [deployedDefaultBundle, setDeployedDefaultBundle] = useState<PortfolioBackupBundle | null>(null);
+
   // Load initial state with localStorage fallbacks
   const [siteConfig, setSiteConfig] = useState<SiteConfig>(() => {
     try {
@@ -189,38 +228,120 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [lightboxImage, setLightboxImage] = useState<{ url: string; title: string; caption?: string } | null>(null);
 
-  // Sync to localStorage
+  // Load the shared deployment baseline bundled from /portfolio_backup.json.
+  // This is what makes Admin-exported content visible to every new visitor, not just this browser.
   useEffect(() => {
+    let cancelled = false;
+
+    const loadDeployedBackup = async () => {
+      try {
+        const response = await fetch(deployedBackupUrl, { cache: 'no-store' });
+
+        if (!response.ok) {
+          throw new Error(`Backup file not found (${response.status})`);
+        }
+
+        const parsed = (await response.json()) as PortfolioBackupBundle;
+        const looksLikePortfolioBackup =
+          parsed &&
+          typeof parsed === 'object' &&
+          (parsed.siteConfig || parsed.projects || parsed.experience || parsed.resumeData);
+
+        if (!looksLikePortfolioBackup || cancelled) {
+          return;
+        }
+
+        setDeployedDefaultBundle(parsed);
+
+        // Browser-specific CMS edits remain authoritative. Only fill categories that were absent
+        // when the visitor first opened the deployed site.
+        if (!hadLocalDataAtStartup.siteConfig && parsed.siteConfig) {
+          const backupConfig = parsed.siteConfig;
+          setSiteConfig({
+            ...DEFAULT_SITE_CONFIG,
+            ...backupConfig,
+            heroVisuals: {
+              main: { ...DEFAULT_SITE_CONFIG.heroVisuals.main, ...(backupConfig.heroVisuals?.main || {}) },
+              sub1: { ...DEFAULT_SITE_CONFIG.heroVisuals.sub1, ...(backupConfig.heroVisuals?.sub1 || {}) },
+              sub2: { ...DEFAULT_SITE_CONFIG.heroVisuals.sub2, ...(backupConfig.heroVisuals?.sub2 || {}) },
+            },
+            educationList: backupConfig.educationList || DEFAULT_SITE_CONFIG.educationList,
+            activityList: backupConfig.activityList || DEFAULT_SITE_CONFIG.activityList,
+            profileProjectList: backupConfig.profileProjectList || DEFAULT_SITE_CONFIG.profileProjectList,
+            skills: backupConfig.skills || DEFAULT_SITE_CONFIG.skills,
+          });
+        }
+        if (!hadLocalDataAtStartup.projects && Array.isArray(parsed.projects)) {
+          setProjects(parsed.projects);
+        }
+        if (!hadLocalDataAtStartup.experience && Array.isArray(parsed.experience)) {
+          setExperience(parsed.experience);
+        }
+        if (!hadLocalDataAtStartup.howIWork && Array.isArray(parsed.howIWork)) {
+          setHowIWork(parsed.howIWork);
+        }
+        if (!hadLocalDataAtStartup.resumeData && parsed.resumeData) {
+          setResumeData({ ...DEFAULT_RESUME_DATA, ...parsed.resumeData });
+        }
+      } catch (err) {
+        // A missing backup is safe: the original code defaults are used.
+        console.info('Shared portfolio backup was not loaded; using code defaults.', err);
+      } finally {
+        if (!cancelled) setBootstrapDone(true);
+      }
+    };
+
+    loadDeployedBackup();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Sync to localStorage only after the shared baseline had a chance to load.
+  useEffect(() => {
+    if (!bootstrapDone) return;
     try {
       localStorage.setItem(STORAGE_KEYS.SITE_CONFIG, JSON.stringify(siteConfig));
     } catch (err) {
       console.warn('Storage limit or error saving siteConfig:', err);
     }
-  }, [siteConfig]);
+  }, [siteConfig, bootstrapDone]);
 
   useEffect(() => {
+    if (!bootstrapDone) return;
     try {
       localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(projects));
     } catch (err) {
       console.warn('Storage limit or error saving projects:', err);
     }
-  }, [projects]);
+  }, [projects, bootstrapDone]);
 
   useEffect(() => {
+    if (!bootstrapDone) return;
     try {
       localStorage.setItem(STORAGE_KEYS.EXPERIENCE, JSON.stringify(experience));
     } catch (err) {
       console.warn('Storage limit or error saving experience:', err);
     }
-  }, [experience]);
+  }, [experience, bootstrapDone]);
 
   useEffect(() => {
+    if (!bootstrapDone) return;
+    try {
+      localStorage.setItem(STORAGE_KEYS.HOW_I_WORK, JSON.stringify(howIWork));
+    } catch (err) {
+      console.warn('Storage limit or error saving howIWork:', err);
+    }
+  }, [howIWork, bootstrapDone]);
+
+  useEffect(() => {
+    if (!bootstrapDone) return;
     try {
       localStorage.setItem(STORAGE_KEYS.RESUME_DATA, JSON.stringify(resumeData));
     } catch (err) {
       console.warn('Storage limit or error saving resumeData:', err);
     }
-  }, [resumeData]);
+  }, [resumeData, bootstrapDone]);
 
   // Check URL query parameters for direct link (e.g. ?project=fieldclub or ?admin=true)
   useEffect(() => {
@@ -409,10 +530,16 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   };
 
   const resetToDefaultData = () => {
-    setSiteConfig(DEFAULT_SITE_CONFIG);
-    setProjects(DEFAULT_PROJECTS);
-    setExperience(DEFAULT_EXPERIENCE);
-    setResumeData(DEFAULT_RESUME_DATA);
+    // If a deployment backup exists, treat it as the real site default.
+    setSiteConfig(deployedDefaultBundle?.siteConfig
+      ? { ...DEFAULT_SITE_CONFIG, ...deployedDefaultBundle.siteConfig }
+      : DEFAULT_SITE_CONFIG);
+    setProjects(Array.isArray(deployedDefaultBundle?.projects) ? deployedDefaultBundle!.projects! : DEFAULT_PROJECTS);
+    setExperience(Array.isArray(deployedDefaultBundle?.experience) ? deployedDefaultBundle!.experience! : DEFAULT_EXPERIENCE);
+    setHowIWork(Array.isArray(deployedDefaultBundle?.howIWork) ? deployedDefaultBundle!.howIWork! : DEFAULT_HOW_I_WORK);
+    setResumeData(deployedDefaultBundle?.resumeData
+      ? { ...DEFAULT_RESUME_DATA, ...deployedDefaultBundle.resumeData }
+      : DEFAULT_RESUME_DATA);
     try {
       localStorage.removeItem(STORAGE_KEYS.SITE_CONFIG);
       localStorage.removeItem(STORAGE_KEYS.PROJECTS);
@@ -470,6 +597,11 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   };
 
   const selectedProject = projects.find((p) => p.id === selectedProjectId) || null;
+
+  // Prevent a brief flash of the old code defaults while the shared backup is loading.
+  if (!bootstrapDone) {
+    return <div className="min-h-screen bg-[#F4F3EF]" aria-label="포트폴리오 불러오는 중" />;
+  }
 
   return (
     <PortfolioContext.Provider
